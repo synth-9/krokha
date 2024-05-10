@@ -14,8 +14,9 @@ class Router
     public function dispatch($requestUri, $requestMethod)
     {
         foreach ($this->routes as $route) {
-            if ($route->matches($requestUri, $requestMethod)) {
-                return $route->run();
+            $params = $route->matches($requestUri, $requestMethod);
+            if ($params !== false) {
+                return $route->run($params);
             }
         }
         header("HTTP/1.1 404 Not Found");

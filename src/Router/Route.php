@@ -17,13 +17,18 @@ class Route
 
     public function matches($uri, $method)
     {
+        if ($this->method != $method) {
+            return false;
+        }
+
         $pathRegex = preg_replace('#\{[\w]+\}#', '([^/]+)', $this->path);
         $pathRegex = "#^" . $pathRegex . "$#";
 
-        if ($this->method == $method && preg_match($pathRegex, $uri, $matches)) {
+        if (preg_match($pathRegex, $uri, $matches)) {
             array_shift($matches); // Remove the full URI match
-            return $this->run($matches);
+            return $matches;
         }
+
         return false;
     }
 
@@ -31,11 +36,6 @@ class Route
     {
         if (is_callable($this->action)) {
             return call_user_func_array($this->action, $params);
-        } elseif (is_string($this->action)) {
-            // Assuming the action string is in the format 'Controller@method'
-            [$controllerName, $methodName] = explode('@', $this->action, 2);
-            $controller = new $controllerName();
-            return call_user_func_array([$controller, $methodName], $params);
         }
         return null;
     }
